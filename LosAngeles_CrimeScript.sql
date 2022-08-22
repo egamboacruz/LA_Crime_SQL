@@ -81,5 +81,38 @@ GROUP BY vict_descent;
 -- 99 percent of the cases with unknown sex also have unkown descent
 
 -- this is an analysis on crime and the victims, without victim information I cannot do much in a victim crime analysis.
--- I will not use X and H for analysis.
+-- I will not use X and H for analysis of crime but I can analyze the unknown observation and figure out why they are not being reported.
 
+-- male vs female victims by year of 2020 & 2021
+SELECT 
+	year(t.date_occ) AS year_occ,vict_sex, COUNT(*) AS cases
+FROM
+	LosAngeles_Crime.dbo.victim AS v
+	JOIN
+		LosAngeles_Crime.dbo.time AS t
+			ON v.dr_no = t.dr_no
+WHERE vict_sex IN ('F','M')
+GROUP BY vict_sex, year(t.date_occ)
+
+-- male vs female victims by descent and year of 2020 & 2021
+SELECT 
+	year(t.date_occ) AS year_occ,vict_sex, v.vict_descent, COUNT(*) AS cases
+FROM
+	LosAngeles_Crime.dbo.victim AS v
+	JOIN
+		LosAngeles_Crime.dbo.time AS t
+			ON v.dr_no = t.dr_no
+WHERE vict_sex IN ('F','M')
+GROUP BY vict_sex, year(t.date_occ), v.vict_descent
+ORDER BY year(t.date_occ);
+	
+--female vs male victims by age_group and year of 2020 & 2021
+SELECT year(t.date_occ) AS year_occ, v.age_group, v.vict_sex, COUNT(*) AS cases
+FROM 
+	LosAngeles_Crime.dbo.victim AS v
+		JOIN
+			LosAngeles_Crime.dbo.time AS t
+				ON v.dr_no = t.dr_no
+WHERE vict_sex IN ('F','M')
+GROUP BY year(t.date_occ),v.age_group,v.vict_sex
+ORDER BY year(t.date_occ),v.vict_sex
