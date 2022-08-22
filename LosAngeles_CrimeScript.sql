@@ -115,4 +115,21 @@ FROM
 				ON v.dr_no = t.dr_no
 WHERE vict_sex IN ('F','M')
 GROUP BY year(t.date_occ),v.age_group,v.vict_sex
-ORDER BY year(t.date_occ),v.vict_sex
+ORDER BY year(t.date_occ),v.age_group
+
+-- victim Age group and victim descent by year of 2020 & 2021
+SELECT year(t.date_occ) AS year_occ, v.age_group, v.vict_descent, COUNT(*) AS cases
+FROM
+	LosAngeles_Crime.dbo.victim AS v
+		JOIN
+			LosAngeles_Crime.dbo.time AS t
+				ON v.dr_no = t.dr_no
+GROUP BY year(t.date_occ) ,v.age_group, v.vict_descent
+ORDER BY year(t.date_occ), v.age_group, cases DESC
+
+-- Analyze victims and crime
+
+
+
+
+
