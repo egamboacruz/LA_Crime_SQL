@@ -127,9 +127,25 @@ FROM
 GROUP BY year(t.date_occ) ,v.age_group, v.vict_descent
 ORDER BY year(t.date_occ), v.age_group, cases DESC
 
--- Analyze victims and crime
+-- All categories of crime in the database and their case count. Ranked by case count.
+SELECT crm_cd_desc as crime_description, COUNT(*) AS cases
+FROM
+	LosAngeles_Crime.dbo.crime
+GROUP BY 
+	crm_cd_desc
+ORDER BY cases DESC
 
-
-
+-- crime cases and age groups
+SELECT 
+	v.age_group, c.crm_cd_desc, COUNT(*) AS cases
+FROM
+	LosAngeles_Crime.dbo.victim AS v
+	JOIN
+		LosAngeles_Crime.dbo.crime AS c
+			ON v.dr_no = c.dr_no
+GROUP BY 
+	v.age_group, c.crm_cd_desc
+ORDER BY 
+	v.age_group, cases DESC
 
 
