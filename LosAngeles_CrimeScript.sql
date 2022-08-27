@@ -135,6 +135,30 @@ GROUP BY
 	crm_cd_desc
 ORDER BY cases DESC
 
+
+-- crime cases and year
+SELECT
+	year(t.date_occ) AS year_occ, c.crm_cd_desc AS crime, COUNT(*) AS cases
+FROM 
+	LosAngeles_Crime.dbo.time AS t
+	JOIN
+		LosAngeles_Crime.dbo.crime AS c
+			ON t.dr_no = c.dr_no
+GROUP BY year(t.date_occ), c.crm_cd_desc
+ORDER BY year(t.date_occ),cases DESC;
+
+--crime cases and sex
+SELECT
+	v.vict_sex AS victim_sex, c.crm_cd_desc AS crime, COUNT(*) AS cases
+FROM 
+	LosAngeles_Crime.dbo.victim AS v
+		JOIN
+			LosAngeles_Crime.dbo.crime AS c
+				ON v.dr_no = c.dr_no
+WHERE v.vict_sex IN ('F','M')
+GROUP BY v.vict_sex, c.crm_cd_desc
+ORDER BY cases DESC, v.vict_sex;
+
 -- crime cases and age groups
 SELECT 
 	v.age_group, c.crm_cd_desc, COUNT(*) AS cases
