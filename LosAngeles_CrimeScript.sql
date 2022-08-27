@@ -1,7 +1,4 @@
--- Data was cleaned in R before imported into database
-
--- Looking through data table
- 
+-- glimpse through data tables
 SELECT *
 FROM LosAngeles_Crime.dbo.location;
 
@@ -17,8 +14,7 @@ FROM LosAngeles_Crime.dbo.weapons;
 SELECT * 
 FROM LosAngeles_Crime.dbo.crime;
 
--- EDA
-
+------------------------- START OF EDA
 -- Crime data by victim Sex
 -- male vs female victims
 SELECT vict_sex, COUNT(*) AS Cases,
@@ -82,6 +78,7 @@ GROUP BY vict_descent;
 
 -- this is an analysis on crime and the victims, without victim information I cannot do much in a victim crime analysis.
 -- I will not use X and H for analysis of crime but I can analyze the unknown observation and figure out why they are not being reported.
+
 
 -- male vs female victims by year of 2020 & 2021
 SELECT 
