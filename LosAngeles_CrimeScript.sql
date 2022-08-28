@@ -181,6 +181,33 @@ FROM
 GROUP BY 
 	v.age_group, c.crm_cd_desc
 ORDER BY 
-	v.age_group, cases DESC
+	v.age_group, cases DESC;
+
+-- are_name and crime cases by year
+SELECT
+	year(time.date_occ) AS year_occ, location.area_name AS area, COUNT(*) AS cases
+FROM
+	LosAngeles_Crime.dbo.location AS location
+		JOIN
+			LosAngeles_Crime.dbo.time AS time
+				ON location.dr_no = time.dr_no
+GROUP BY year(time.date_occ), location.area_name
+ORDER BY year(time.date_occ),cases DESC;
+
+-- area_name and crimes committed at location.
+SELECT year(time.date_occ), location.area_name, crime.crm_cd_desc, COUNT(*) AS cases
+FROM 
+	LosAngeles_Crime.dbo.time AS time
+	 JOIN 
+		LosAngeles_Crime.dbo.location AS location
+			ON time.dr_no = location.dr_no
+				JOIN
+					LosAngeles_Crime.dbo.crime AS crime
+						ON location.dr_no = crime.dr_no
+GROUP BY year(time.date_occ), location.area_name, crime.crm_cd_desc
+ORDER BY year(time.date_occ), location.area_name, cases DESC;
+
+
+
 
 
