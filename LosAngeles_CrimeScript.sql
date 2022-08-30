@@ -1,213 +1,114 @@
--- glimpse through data tables
-SELECT *
-FROM LosAngeles_Crime.dbo.location;
 
-SELECT * 
-FROM LosAngeles_Crime.dbo.time;
+-- Scan through data 
+SELECT * FROM LosAngeles_Crime.dbo.LA_CrimeData;
 
-SELECT * 
-FROM LosAngeles_Crime.dbo.victim;
-
-SELECT * 
-FROM LosAngeles_Crime.dbo.weapons;
-
-SELECT * 
-FROM LosAngeles_Crime.dbo.crime;
-
-------------------------- START OF EDA
--- Crime data by victim Sex
--- male vs female victims
+-- what are all the crimes committed and how many cases of that crime were reported by year
 SELECT
-	vict_sex, COUNT(*) AS Cases,
-		COUNT(*) * 100.0 / SUM(COUNT(*)) over() as perc
+	year(time_occ) AS 'year', crm_cd_desc AS 'crimes_committed', COUNT(*) AS cases
 FROM 
-	LosAngeles_Crime.dbo.victim
-GROUP BY vict_sex;
-
--- victim sex included
--- H <- Unknown
--- X <- Unknown
--- NA <- Unknown
--- F <- Female
--- M <- Male
-
--- Glance through data with H & X as vict_sex
-SELECT *
-FROM 
-	LosAngeles_Crime.dbo.victim AS victim
-		JOIN 
-			LosAngeles_Crime.dbo.crime AS crime
-				ON victim.dr_no = crime.dr_no
-WHERE victim.vict_sex IN ('H','X')
-ORDER BY vict_sex;
-
--- How many victims with unknown sex have unknown age
-SELECT age_group,COUNT(*) AS cases,
-	COUNT(*) * 100.0 /SUM(COUNT(*)) over() AS perc
-FROM 
-	LosAngeles_Crime.dbo.victim AS victim
-WHERE victim.vict_sex = 'X'
-GROUP BY age_group;
--- 90 percent of unkown sex also have unknown age
-
--- Age group is dirty 
-----------------------------------Clean Age_Group
---Distinct age groups
-SELECT DISTINCT age_group, dev_stage
-FROM 
-	LosAngeles_Crime.dbo.victim;
--- 4-Feb
--- 12-May
--- it is not supposed to be a date but an age range for grouping.
-
--- 4-Feb will be replaced by 1-3
-UPDATE LosAngeles_Crime.dbo.victim
-SET age_group = '1-3'
-WHERE age_group = '4-Feb';
-
--- 12-May will be replaced by 4-12
-UPDATE LosAngeles_Crime.dbo.victim
-SET age_group = '4-12'
-WHERE age_group = '12-May';
--- Run Distinct age group query above to recheck// Age_group is now cleaned.
------------------------------------ END OF Cleaning Age_group -----------------------------------------------
-
-
-
--- How many victims with unknown sex have unknown descent
-SELECT vict_descent,COUNT(*) AS cases,
-	COUNT(*) * 100.0 /SUM(COUNT(*)) over() AS perc
-FROM 
-	LosAngeles_Crime.dbo.victim AS victim
-WHERE vict_sex = 'X'
-GROUP BY vict_descent;
--- 99 percent of the cases with unknown sex also have unkown descent
-
--- this is an analysis on crime and the victims, without victim information I cannot do much in a victim crime analysis.
--- I will not use X and H for analysis of crime but I can analyze the unknown observation and figure out why they are not being reported.
-
-
--- male vs female victims by year (2020 & 2021)
-SELECT 
-	year(t.date_occ) AS year_occ,vict_sex, COUNT(*) AS cases
-FROM
-	LosAngeles_Crime.dbo.victim AS v
-	JOIN
-		LosAngeles_Crime.dbo.time AS t
-			ON v.dr_no = t.dr_no
-WHERE vict_sex IN ('F','M')
-GROUP BY vict_sex, year(t.date_occ);
-
--- male vs female victims by descent and year of 2020 & 2021
-SELECT 
-	year(t.date_occ) AS year_occ,vict_sex, v.vict_descent, COUNT(*) AS cases
-FROM
-	LosAngeles_Crime.dbo.victim AS v
-	JOIN
-		LosAngeles_Crime.dbo.time AS t
-			ON v.dr_no = t.dr_no
-WHERE 
-	vict_sex IN ('F','M') AND vict_descent NOT IN ('Unkown','NA')
+	LosAngeles_Crime.dbo.LA_CrimeData
 GROUP BY 
-	vict_sex, year(t.date_occ), v.vict_descent
+	year(time_occ), crm_cd_desc
 ORDER BY 
-	year(t.date_occ),vict_sex,cases DESC;
-	
---female vs male victims by age_group and year of 2020 & 2021
-SELECT year(t.date_occ) AS year_occ, v.age_group, v.vict_sex, COUNT(*) AS cases
+	year(time_occ), cases DESC;
+
+-- How many female victims vs male victims by year
+SELECT
+	year(time_occ) AS 'year', vict_sex, COUNT(*) AS cases
 FROM 
-	LosAngeles_Crime.dbo.victim AS v
-		JOIN
-			LosAngeles_Crime.dbo.time AS t
-				ON v.dr_no = t.dr_no
-WHERE 
-	vict_sex IN ('F','M') AND v.vict_descent NOT IN ('NA') AND
-		v.age_group != 'Unkown' --unknown is misspelled
+	LosAngeles_Crime.dbo.LA_CrimeData
+WHERE
+	vict_sex IN ('F','M')
+GROUP BY
+	year(time_occ), vict_sex
+ORDER BY year(time_occ), cases DESC;
+
+
+-- how are the age groups affected by crime 
+SELECT
+	year(time_occ) AS 'year', age_group, COUNT(*) AS cases
+FROM
+	LosAngeles_Crime.dbo.LA_CrimeData
+WHERE age_group != 'Unkown'
 GROUP BY 
-	year(t.date_occ),v.age_group,v.vict_sex
+	year(time_occ), age_group
+ORDER BY year(time_occ), cases DESC;
+
+-- how are victims by descent affected (total between two years.)
+SELECT
+	vict_descent, COUNT(*) as cases,
+	COUNT(*) * 100.0/ SUM(COUNT(*)) OVER() AS perc
+FROM	LosAngeles_Crime.dbo.LA_CrimeData
+WHERE
+	vict_descent NOT IN ('NA','Other','Unkown')
+GROUP BY 
+	vict_descent
+ORDER BY cases DESC;	
+-- Hispanics/ Latins made up 43.79 percent of the victims in 2020 - 2021
+
+
+-- how are victims by descent affected by year
+SELECT
+	year(time_occ) AS 'year', vict_descent, COUNT(*) as cases
+FROM	LosAngeles_Crime.dbo.LA_CrimeData
+WHERE
+	vict_descent NOT IN ('NA','Other','Unkown')
+GROUP BY 
+	year(time_occ), vict_descent
+ORDER BY year(time_occ), cases DESC;
+
+-- how are victims by descent, sex, age affected
+-- Hispanics made up the top 4 victims in LA excluding 
+-- white males in the age group of 20-39 which came in 4th
+SELECT
+	vict_descent, vict_sex, age_group, COUNT(*) as cases,
+	COUNT(*) * 100.0/ SUM(COUNT(*)) OVER() AS Perc
+FROM
+	LosAngeles_Crime.dbo.LA_CrimeData
+WHERE
+	vict_descent NOT IN ('NA','Unkown') AND vict_sex IN ('F','M')
+GROUP BY
+	vict_descent, vict_sex, age_group
 ORDER BY
-	year(t.date_occ),cases DESC
-
--- victim Age group and victim descent by year of 2020 & 2021
-SELECT year(t.date_occ) AS year_occ, v.age_group, v.vict_descent, COUNT(*) AS cases
-FROM
-	LosAngeles_Crime.dbo.victim AS v
-		JOIN
-			LosAngeles_Crime.dbo.time AS t
-				ON v.dr_no = t.dr_no
-GROUP BY year(t.date_occ) ,v.age_group, v.vict_descent
-ORDER BY year(t.date_occ), v.age_group, cases DESC
-
--- All categories of crime in the database and their case count. Ranked by case count.
-SELECT crm_cd_desc as crime_description, COUNT(*) AS cases
-FROM
-	LosAngeles_Crime.dbo.crime
-GROUP BY 
-	crm_cd_desc
-ORDER BY cases DESC
+	cases DESC;
 
 
--- crime description and number of cases by year
-SELECT
-	year(t.date_occ) AS year_occ, c.crm_cd_desc AS crime, COUNT(*) AS cases
-FROM 
-	LosAngeles_Crime.dbo.time AS t
-	JOIN
-		LosAngeles_Crime.dbo.crime AS c
-			ON t.dr_no = c.dr_no
-GROUP BY year(t.date_occ), c.crm_cd_desc
-ORDER BY year(t.date_occ),cases DESC;
-
---crime description and number of cases by victim's sex
-SELECT
-	v.vict_sex AS victim_sex, c.crm_cd_desc AS crime, COUNT(*) AS cases
-FROM 
-	LosAngeles_Crime.dbo.victim AS v
-		JOIN
-			LosAngeles_Crime.dbo.crime AS c
-				ON v.dr_no = c.dr_no
-WHERE v.vict_sex IN ('F','M')
-GROUP BY v.vict_sex, c.crm_cd_desc
-ORDER BY cases DESC, v.vict_sex;
-
--- crime description and count of cases by age groups
+-- time and cases.
 SELECT 
-	v.age_group, c.crm_cd_desc, COUNT(*) AS cases
-FROM
-	LosAngeles_Crime.dbo.victim AS v
-	JOIN
-		LosAngeles_Crime.dbo.crime AS c
-			ON v.dr_no = c.dr_no
-GROUP BY 
-	v.age_group, c.crm_cd_desc
-ORDER BY 
-	v.age_group, cases DESC;
-
--- are_name and crime cases by year
-SELECT
-	year(time.date_occ) AS year_occ, location.area_name AS area, COUNT(*) AS cases
-FROM
-	LosAngeles_Crime.dbo.location AS location
-		JOIN
-			LosAngeles_Crime.dbo.time AS time
-				ON location.dr_no = time.dr_no
-GROUP BY year(time.date_occ), location.area_name
-ORDER BY year(time.date_occ),cases DESC;
-
--- area_name and crimes committed at location.
-SELECT year(time.date_occ), location.area_name, crime.crm_cd_desc, COUNT(*) AS cases
+	CAST(time_occ AS time)[time], COUNT(*) AS cases
 FROM 
-	LosAngeles_Crime.dbo.time AS time
-	 JOIN 
-		LosAngeles_Crime.dbo.location AS location
-			ON time.dr_no = location.dr_no
-				JOIN
-					LosAngeles_Crime.dbo.crime AS crime
-						ON location.dr_no = crime.dr_no
-GROUP BY year(time.date_occ), location.area_name, crime.crm_cd_desc
-ORDER BY year(time.date_occ), location.area_name, cases DESC;
+	LosAngeles_Crime.dbo.LA_CrimeData
+GROUP BY 
+	CAST(time_occ AS time)
+ORDER BY 
+	CAST(time_occ AS time);
 
+-- cases by the hour. Looking at what time does the most crime happen.
+SELECT 
+	DATEPART(HOUR, time_occ)[time_hourly], COUNT(*) AS cases
+FROM 
+	LosAngeles_Crime.dbo.LA_CrimeData
+GROUP BY 
+	DATEPART(HOUR, time_occ)
+ORDER BY 
+	DATEPART(HOUR, time_occ);
 
+-- how are areas affected by crime
+SELECT
+	year(time_occ) AS 'year', area_name, crm_cd_desc, COUNT(*) AS cases
+FROM
+	LosAngeles_Crime.dbo.LA_CrimeData
+WHERE
+	lat != 0 AND lon != 0
+GROUP BY year(time_occ), area_name, crm_cd_desc, lat, lon
+ORDER BY year(time_occ), cases DESC;
 
-
-
+-- What type of premises is crime mostly committed
+SELECT 
+	year(time_occ) AS 'year', premis_desc, COUNT(*) AS cases
+FROM 
+	LosAngeles_Crime.dbo.LA_CrimeData
+GROUP BY
+	year(time_occ), premis_desc
+ORDER BY 
+	year(time_occ), cases DESC;
