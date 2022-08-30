@@ -5,7 +5,7 @@
 # Technology Used
 * SQL
 * Excel
-* Tableau 
+* Tableau - https://public.tableau.com/app/profile/eduardo.gamboacruz/viz/CrimeInLosAngeles_16618441251010/Dashboard1
 
  Data provided by The City of Los Angeles
  https://data.lacity.org/Public-Safety/Crime-Data-from-2020-to-Present/2nrs-mtv8
