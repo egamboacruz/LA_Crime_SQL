@@ -1,6 +1,6 @@
 # Crime In Los Angeles
 ## Eduardo Gamboa-Cruz
-### This project is an analysis of crime in Los Angeles, California from 2020 to 2021. I will be covering what crimes affect who and where they are committed using Microsoft Server SQL and visualizing the data in Tableau. The data was gather via api with R and cleaned in R. The data was then exported in a excel file then imported into MSsql server.
+### This project is an analysis of crime in Los Angeles, California from 2020 to 2021. I will be covering what crimes affect who and where they are committed using Microsoft Server SQL and visualizing the data in Tableau. The data was gather via api with R and and will be cleaned and analyzed in Microsoft Server sql.
 
 # Technology Used
 * Microsoft Server SQL
