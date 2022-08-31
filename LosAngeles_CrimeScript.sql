@@ -91,35 +91,35 @@ SELECT * FROM LosAngeles_Crime.dbo.LA_CrimeData;
 
 -- what are all the crimes committed and how many cases of that crime were reported by year
 SELECT
-	year(time_occ) AS 'year', crm_cd_desc AS 'crimes_committed', COUNT(*) AS cases
+	year(date_occ) AS 'year', crm_cd_desc AS 'crimes_committed', COUNT(*) AS cases
 FROM 
 	LosAngeles_Crime.dbo.LA_CrimeData
 GROUP BY 
-	year(time_occ), crm_cd_desc
+	year(date_occ), crm_cd_desc
 ORDER BY 
-	year(time_occ), cases DESC;
+	year(date_occ), cases DESC;
 
 -- How many female victims vs male victims by year
 SELECT
-	year(time_occ) AS 'year', vict_sex, COUNT(*) AS cases
+	year(date_occ) AS 'year', vict_sex, COUNT(*) AS cases
 FROM 
 	LosAngeles_Crime.dbo.LA_CrimeData
 WHERE
 	vict_sex IN ('F','M')
 GROUP BY
-	year(time_occ), vict_sex
-ORDER BY year(time_occ), cases DESC;
+	year(date_occ), vict_sex
+ORDER BY year(date_occ), cases DESC;
 
 
 -- how are the age groups affected by crime 
 SELECT
-	year(time_occ) AS 'year', age_group, COUNT(*) AS cases
+	year(date_occ) AS 'year', age_group, COUNT(*) AS cases
 FROM
 	LosAngeles_Crime.dbo.LA_CrimeData
-WHERE age_group != 'Unkown'
+WHERE age_group != 'Unknown'
 GROUP BY 
-	year(time_occ), age_group
-ORDER BY year(time_occ), cases DESC;
+	year(date_occ), age_group
+ORDER BY year(date_occ), cases DESC;
 
 -- how are victims by descent affected (total between two years.)
 SELECT
@@ -135,14 +135,14 @@ ORDER BY cases DESC;
 -- at 43.79% in 2020 - 2021
 -- how are victims by descent affected yearly
 SELECT
-	year(time_occ), vict_descent, COUNT(*) as cases
+	year(date_occ), vict_descent, COUNT(*) as cases
 FROM	LosAngeles_Crime.dbo.LA_CrimeData
 WHERE
 	vict_descent NOT IN ('NA','Other','Unkown')
 GROUP BY 
-	year(time_occ), vict_descent
+	year(date_occ), vict_descent
 ORDER BY 
-	year(time_occ), cases DESC;	
+	year(date_occ), cases DESC;	
 
 
 
@@ -209,20 +209,20 @@ ORDER BY
 
 -- how are areas affected by crime
 SELECT
-	year(time_occ) AS 'year', area_name, crm_cd_desc, COUNT(*) AS cases
+	year(date_occ) AS 'year', area_name, crm_cd_desc, COUNT(*) AS cases
 FROM
 	LosAngeles_Crime.dbo.LA_CrimeData
 WHERE
 	lat != 0 AND lon != 0
-GROUP BY year(time_occ), area_name, crm_cd_desc, lat, lon
-ORDER BY year(time_occ), cases DESC;
+GROUP BY year(date_occ), area_name, crm_cd_desc, lat, lon
+ORDER BY year(date_occ), cases DESC;
 
 -- What type of premises is crime mostly committed
 SELECT 
-	year(time_occ) AS 'year', premis_desc, COUNT(*) AS cases
+	year(date_occ) AS 'year', premis_desc, COUNT(*) AS cases
 FROM 
 	LosAngeles_Crime.dbo.LA_CrimeData
 GROUP BY
-	year(time_occ), premis_desc
+	year(date_occ), premis_desc
 ORDER BY 
-	year(time_occ), cases DESC;
+	year(date_occ), cases DESC;
