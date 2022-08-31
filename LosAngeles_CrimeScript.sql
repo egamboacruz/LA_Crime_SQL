@@ -12,7 +12,7 @@ missing leading zeros for example
 */
 -- change time_occ to a varchar to be able to CONCAT Leading Zero's
 ALTER TABLE LosAngeles_Crime.dbo.LA_CrimeData
-ALTER COLUMN time_occ VARCHAR(4);
+ALTER COLUMN time_occ VARCHAR(5);
 
 -- use UPDATE AND CASE to clean time_occ column.
 UPDATE LosAngeles_Crime.dbo.LA_CrimeData
@@ -82,6 +82,25 @@ SET age_group = CASE
 WHERE vict_sex IN ('F','M');
 
 
+-- ALTER time column do give space for colon
+ALTER TABLE LosAngeles_Crime.dbo.LA_CrimeData
+ALTER COLUMN time_occ VARCHAR(5);
+-- add colons to time
+UPDATE LosAngeles_Crime.dbo.LA_CrimeData
+SET time_occ = CONCAT(LEFT(time_occ,2),':',RIGHT(time_occ,2))
+
+-- Create date and time column 
+ALTER TABLE LosAngeles_Crime.dbo.LA_CrimeData
+ADD datetime_occ varchar(20);
+
+-- insert date time by concatenating  date and time into column and converting it into datetime format
+UPDATE LosAngeles_Crime.dbo.LA_CrimeData
+SET datetime_occ =  CONVERT(datetime,CONCAT(LEFT(CONVERT(varchar(MAX),date_occ,120),10), ' ', time_occ),121)
+
+-- alter column into datetime datatype
+ALTER TABLE LosAngeles_Crime.dbo.LA_CrimeData
+ALTER COLUMN  datetime_occ datetime not null;
+
 -- END  of cleaning process
 
 
@@ -91,13 +110,13 @@ SELECT * FROM LosAngeles_Crime.dbo.LA_CrimeData;
 
 -- what are all the crimes committed and how many cases of that crime were reported by year
 SELECT
-	year(date_occ) AS 'year', crm_cd_desc AS 'crimes_committed', COUNT(*) AS cases
+	year(datetime_occ) AS 'year', crm_cd_desc AS 'crimes_committed', COUNT(*) AS cases
 FROM 
 	LosAngeles_Crime.dbo.LA_CrimeData
 GROUP BY 
-	year(date_occ), crm_cd_desc
+	year(datetime_occ), crm_cd_desc
 ORDER BY 
-	year(date_occ), cases DESC;
+	year(datetime_occ), cases DESC;
 
 -- How many female victims vs male victims by year
 SELECT
