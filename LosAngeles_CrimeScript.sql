@@ -2,7 +2,7 @@
 SELECT *
 FROM LosAngeles_Crime.dbo.LA_CrimeData
 
---																			 Cleaning Process
+--											Cleaning Process
 
 /*
 time is supposed to be in military time
@@ -76,10 +76,9 @@ SET age_group = CASE
 					WHEN vict_age >= 1 AND vict_age <= 14 THEN '00-14' 
 					WHEN vict_age >= 15 AND vict_age <= 24 THEN '15-24' 
 					WHEN vict_age >= 25 AND vict_age <= 64 THEN '25-65' 
-					WHEN vict_age > 65 THEN '65+' 
+					WHEN vict_age >= 65 THEN '65+' 
 				
-				END
-WHERE vict_sex IN ('F','M');
+				END;
 
 
 -- ALTER time column do give space for colon
@@ -101,7 +100,7 @@ SET datetime_occ =  CONVERT(datetime,CONCAT(LEFT(CONVERT(varchar(MAX),date_occ,1
 ALTER TABLE LosAngeles_Crime.dbo.LA_CrimeData
 ALTER COLUMN  datetime_occ datetime not null;
 
--- END  of cleaning process
+--												END  of cleaning process
 
 
 
@@ -171,20 +170,19 @@ FROM
 	LosAngeles_Crime.dbo.LA_CrimeData
 
 
--- how are victims by descent, sex, age affected
+-- how are victims by descent, sex, age affected by year
 -- Hispanics/latin made up the top 5 victims in LA excluding 
 -- white males in the age group of 20-39 which came in 4th
 SELECT
-	vict_descent, vict_sex, age_group, COUNT(*) as cases,
-	COUNT(*) * 100.0/ SUM(COUNT(*)) OVER() AS Perc
+	year(datetime_occ) AS year, vict_descent, vict_sex, age_group, COUNT(*) as cases
 FROM
 	LosAngeles_Crime.dbo.LA_CrimeData
 WHERE
-	vict_descent NOT IN ('NA','Unkown') AND vict_sex IN ('F','M')
+	vict_descent NOT IN ('NA','Unkown') AND vict_sex IN ('F','M') AND vict_age IS NOT NULL
 GROUP BY
-	vict_descent, vict_sex, age_group
+	year(datetime_occ),vict_descent, vict_sex, age_group
 ORDER BY
-	cases DESC;
+	year(datetime_occ), cases DESC;
 
 -- what crimes effect victims by descent.
 SELECT
@@ -196,7 +194,7 @@ WHERE
 GROUP BY 
 	vict_descent, crm_cd_desc
 ORDER BY 
-	cases DESC;
+	vict_descent, cases DESC;
 
 
 
