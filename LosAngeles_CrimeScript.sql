@@ -73,9 +73,12 @@ ADD age_group VARCHAR(5)
 --insert int age_group
 UPDATE LosAngeles_Crime.dbo.LA_CrimeData
 SET age_group = CASE
-					WHEN vict_age >= 1 AND vict_age <= 14 THEN '00-14' 
-					WHEN vict_age >= 15 AND vict_age <= 24 THEN '15-24' 
-					WHEN vict_age >= 25 AND vict_age <= 64 THEN '25-65' 
+					WHEN vict_age >= 1 AND vict_age <= 17 THEN '00-17' 
+					WHEN vict_age >= 18 AND vict_age <= 24 THEN '18-24' 
+					WHEN vict_age >= 25 AND vict_age <= 34 THEN '25-34' 
+					WHEN vict_age >= 35 AND vict_age <= 44 THEN '35-44' 
+					WHEN vict_age >= 45 AND vict_age <= 54 THEN '45-54' 
+					WHEN vict_age >= 55 AND vict_age <= 64 THEN '55-64' 
 					WHEN vict_age >= 65 THEN '65+' 
 				
 				END;
@@ -163,7 +166,6 @@ ORDER BY
 	year(date_occ), cases DESC;	
 
 
-
 SELECT
 	DISTINCT vict_descent
 FROM 
@@ -184,24 +186,46 @@ GROUP BY
 ORDER BY
 	year(datetime_occ), cases DESC;
 
--- what crimes effect victims by descent.
-SELECT
-	vict_descent, crm_cd_desc, COUNT(*) AS cases
+-- Crimes Reported,cases, and victims by Descent, Sex, AgeGroup, and Year
+SELECT 
+	YEAR(datetime_occ) AS year,crm_cd_desc, vict_descent, vict_sex, age_group, COUNT(*) AS cases
 FROM
-	LosAngeles_Crime.dbo.LA_CrimeData
+	LosAngeles_Crime..LA_CrimeData
 WHERE 
-	vict_descent NOT IN ('NA','Unkown')
+	vict_descent != NULL OR vict_sex IN ('F','M') 
+GROUP BY YEAR(datetime_occ),crm_cd_desc, vict_descent, vict_sex, age_group
+ORDER BY
+year,cases DESC;
+
+--Crime cases by date for line graph.
+SELECT 
+	YEAR(datetime_occ) AS year, date_occ, COUNT(*) AS cases
+FROM
+	LosAngeles_Crime..LA_CrimeData
+GROUP BY
+	YEAR(datetime_occ), date_occ;
+
+
+-- crime cases by age and time of day ATTENTION!!!! make a better age group
+SELECT 
+	YEAR(datetime_occ) AS year, CAST(datetime_occ AS time) AS time, age_group, COUNT(*) AS cases
+FROM
+	LosAngeles_Crime..LA_CrimeData
+GROUP BY
+	YEAR(datetime_occ), CAST(datetime_occ AS time), age_group
+ORDER BY
+	year, cases DESC;
+
+
+-- location, crimes, and cases
+SELECT 
+	YEAR(datetime_occ) AS year, area_name, crm_cd_desc, COUNT(*) AS cases
+FROM
+	LosAngeles_Crime..LA_CrimeData
 GROUP BY 
-	vict_descent, crm_cd_desc
+	YEAR(datetime_occ), area_name, crm_cd_desc
 ORDER BY 
-	vict_descent, cases DESC;
-
-
-
-
-
-
-
+	year, cases
 
 
 -- time and cases.
