@@ -1,6 +1,6 @@
 # Crime In Los Angeles
 ## Eduardo Gamboa-Cruz
-### This project is a qualative analysis of crime in Los Angeles, California from 2020 to 2021. The data was gathered via api with R, and was cleaned and analyzed in Microsoft Server sql. Data visualizations will be done in Tableau you can find the link to Tableau public below.
+### This project is a qualative analysis of crime in Los Angeles, California from 2020 to 2021. The data was gathered via api with R, and was cleaned and analyzed in Microsoft Server sql. Data visualizations will be done in Tableau you can find the link to Tableau public below. Taleau Dashboard is interactive and you can filter by time, age group, descent, crime, and location, Give it a try.
 
 # Technology Used
 * R
