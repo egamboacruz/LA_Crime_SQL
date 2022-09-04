@@ -110,6 +110,15 @@ ALTER COLUMN  datetime_occ datetime not null;
 -- Scan through data 
 SELECT * FROM LosAngeles_Crime.dbo.LA_CrimeData;
 
+-- Total crimes committed by year.
+SELECT
+	year(datetime_occ) AS year, COUNT(*) AS cases
+FROM
+	LosAngeles_Crime..LA_CrimeData
+GROUP BY
+	year(datetime_occ);
+
+
 -- what are all the crimes committed and how many cases of that crime were reported by year
 SELECT
 	year(datetime_occ) AS 'year', crm_cd_desc AS 'crimes_committed', COUNT(*) AS cases
@@ -267,3 +276,29 @@ GROUP BY
 	year(date_occ), premis_desc
 ORDER BY 
 	year(date_occ), cases DESC;
+
+
+-- what crime happens around noo
+-- there is a huge spike in all ages at noon
+SELECT 
+	CAST(datetime_occ AS time) as time, crm_cd_desc, COUNT(*)
+FROM
+	LosAngeles_Crime..LA_CrimeData
+WHERE
+	CAST(datetime_occ AS time) BETWEEN '12:0:00.0000000' and '12:59:00.0000000'
+GROUP BY 
+	cast(datetime_occ AS time), crm_cd_desc
+ORDER BY 
+	time;
+
+-- this query can be used for multiple sheets that can interact with each other.
+SELECT 
+	year(datetime_occ) AS year, CAST(datetime_occ AS time)[time], crm_cd_desc, age_group, vict_descent, area_name, COUNT(*) cases
+FROM
+	LosAngeles_Crime..LA_CrimeData
+WHERE
+	vict_sex IN ('F','M') OR vict_descent != 'NA'
+GROUP BY
+	year(datetime_occ),CAST(datetime_occ AS time), crm_cd_desc, age_group, vict_descent, area_name
+ORDER BY
+	year, cases DESC;
